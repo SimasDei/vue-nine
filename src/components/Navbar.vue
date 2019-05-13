@@ -5,8 +5,8 @@
         <router-link to="/">
           <span class="nav-title">Ninja Smoothies</span>
         </router-link>
-        <a class="btn-floating btn-large halfway-fab">
-          <router-link to="/">
+        <a class="btn-floating btn-large halfway-fab tooltipped">
+          <router-link to="/add-smoothie">
             <i class="material-icons">add</i>
           </router-link>
         </a>
