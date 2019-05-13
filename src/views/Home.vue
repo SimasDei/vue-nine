@@ -10,6 +10,9 @@
           </li>
         </ul>
       </div>
+      <router-link class="btn-floating pink halfway-fab" :to="`/edit-smoothie/${smoothie.slug}`">
+        <i class="material-icons edit">edit</i>
+      </router-link>
     </div>
   </div>
 </template>

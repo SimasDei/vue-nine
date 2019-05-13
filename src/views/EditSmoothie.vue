@@ -1,14 +1,14 @@
 <template>
-  <div class="add-smoothie container">
-    <h2 class="center-align indigo-text">Add smoothie</h2>
-    <form @submit.prevent="addSmoothie">
+  <div v-if="smoothie" class="edit-smoothie container">
+    <h2>Edit {{smoothie.title}}</h2>
+    <form @submit.prevent="editSmoothie">
       <div class="field title">
         <label for="title">Smoothie name</label>
-        <input type="text" name="title" v-model="title">
+        <input type="text" name="title" v-model="smoothie.title">
       </div>
-      <div v-for="(ingredient, index) in ingredients" :key="index" class="field">
+      <div v-for="(ingredient, index) in smoothie.ingredients" :key="index" class="field">
         <label for="ingredient">Ingredient:</label>
-        <input type="text" name="ingredient" v-model="ingredients[index]">
+        <input type="text" name="ingredient" v-model="smoothie.ingredients[index]">
         <i class="material-icons delete" @click="deleteIngredient(ingredient)">delete</i>
       </div>
       <div class="field add-ingredient">
@@ -22,7 +22,7 @@
       </div>
       <div class="field center-align">
         <p class="red-text" v-if="feedback">{{feedback}}</p>
-        <button class="btn pink">Add Smoothie</button>
+        <button class="btn pink">Update Smoothie</button>
       </div>
     </form>
   </div>
@@ -32,30 +32,42 @@ import slugify from 'slugify';
 import db from '@/firebase/init';
 
 export default {
-  name: 'AddSmoothie',
+  name: 'EditSmoohie',
   data() {
     return {
-      title: null,
-      slug: null,
+      smoothie: null,
       another: null,
-      ingredients: [],
       feedback: null,
     };
   },
+  created() {
+    const ref = db
+      .collection('smoothies')
+      .where('slug', '==', this.$route.params.slug);
+    ref.get().then((result) => {
+      result.forEach((doc) => {
+        this.smoothie = {
+          id: doc.id,
+          ...doc.data(),
+        };
+      });
+    });
+  },
   methods: {
-    addSmoothie() {
-      if (this.title) {
+    editSmoothie() {
+      if (this.smoothie.title) {
         this.feedback = null;
-        this.slug = slugify(this.title, {
+        this.smoothie.slug = slugify(this.smoothie.title, {
           replacement: '-',
           remove: /[$*_+~.()'"!\-:@]/g,
           lower: true,
         });
         db.collection('smoothies')
-          .add({
-            title: this.title,
-            slug: this.slug,
-            ingredients: this.ingredients,
+          .doc(this.smoothie.id)
+          .update({
+            title: this.smoothie.title,
+            slug: this.smoothie.slug,
+            ingredients: this.smoothie.ingredients,
           })
           .then(() => this.$router.push('/'));
       } else {
@@ -64,7 +76,7 @@ export default {
     },
     addIngredient() {
       if (this.another) {
-        this.ingredients.push(this.another);
+        this.smoothie.ingredients.push(this.another);
         this.another = null;
         this.feedback = null;
       } else {
@@ -72,7 +84,7 @@ export default {
       }
     },
     deleteIngredient(ing) {
-      this.ingredients = this.ingredients.filter(
+      this.smoothie.ingredients = this.smoothie.ingredients.filter(
         ingredient => ingredient !== ing,
       );
     },
@@ -80,7 +92,7 @@ export default {
 };
 </script>
 <style lang="scss">
-.add-smoothie {
+.edit-smoothie {
   margin-top: 60px;
   padding: 20px;
   max-width: 500px;
