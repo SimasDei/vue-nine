@@ -1,4 +1,4 @@
-# vue-nine
+## vue-nine
 
 ## Project setup
 ```
